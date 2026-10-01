@@ -1,6 +1,6 @@
 import type { RuntimeStatus } from "../api/client";
 
-export type WorkspacePage = "mapping-review" | "transactions";
+export type WorkspacePage = "mapping-review" | "transactions" | "spending" | "financial";
 
 export function WorkspaceSidebar({
   activePage,
@@ -20,6 +20,8 @@ export function WorkspaceSidebar({
   }> = [
     { page: "mapping-review", label: "Mapping 审核", status: mappingCount },
     { page: "transactions", label: "交易流水", status: transactionCount },
+    { page: "spending", label: "消费分析" },
+    { page: "financial", label: "财务分析" },
   ];
 
   return (
@@ -43,7 +45,7 @@ export function WorkspaceSidebar({
             {link.status === undefined ? null : <small>{link.status}</small>}
           </a>
         ))}
-        {["消费分析", "财务分析", "自动化"].map((label) => (
+        {["自动化"].map((label) => (
           <span className="workspace-nav__item workspace-nav__item--disabled" key={label}>
             <span>{label}</span>
             <small>下一阶段</small>

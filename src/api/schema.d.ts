@@ -382,6 +382,11 @@ export interface components {
             data: components["schemas"]["FeedbackData"];
             meta: components["schemas"]["ApiMeta"];
         };
+        /** ApiResponse[FinancialAnalyticsData] */
+        ApiResponse_FinancialAnalyticsData_: {
+            data: components["schemas"]["FinancialAnalyticsData"];
+            meta: components["schemas"]["ApiMeta"];
+        };
         /** ApiResponse[HealthData] */
         ApiResponse_HealthData_: {
             data: components["schemas"]["HealthData"];
@@ -432,17 +437,14 @@ export interface components {
             data: components["schemas"]["ScheduledRunData"];
             meta: components["schemas"]["ApiMeta"];
         };
+        /** ApiResponse[SpendingAnalyticsData] */
+        ApiResponse_SpendingAnalyticsData_: {
+            data: components["schemas"]["SpendingAnalyticsData"];
+            meta: components["schemas"]["ApiMeta"];
+        };
         /** ApiResponse[TransactionViewData] */
         ApiResponse_TransactionViewData_: {
             data: components["schemas"]["TransactionViewData"];
-            meta: components["schemas"]["ApiMeta"];
-        };
-        /** ApiResponse[dict[str, Any]] */
-        ApiResponse_dict_str__Any__: {
-            /** Data */
-            data: {
-                [key: string]: unknown;
-            };
             meta: components["schemas"]["ApiMeta"];
         };
         /** EnrichmentData */
@@ -554,6 +556,58 @@ export interface components {
              * @enum {string}
              */
             status: "open" | "resolved";
+        };
+        /** FinancialAggregateData */
+        FinancialAggregateData: {
+            /** Total Income Minor */
+            total_income_minor: number;
+            /** Total Spending Minor */
+            total_spending_minor: number;
+            /** Net Cash Flow Minor */
+            net_cash_flow_minor: number;
+            /** Income Transaction Count */
+            income_transaction_count: number;
+            /** Spending Transaction Count */
+            spending_transaction_count: number;
+            /** Month Count */
+            month_count: number;
+        };
+        /** FinancialAnalyticsData */
+        FinancialAnalyticsData: {
+            /**
+             * Schema Version
+             * @constant
+             */
+            schema_version: 1;
+            /** Currency */
+            currency: string | null;
+            summary: components["schemas"]["FinancialSummaryData"];
+            /** Months */
+            months: components["schemas"]["FinancialMonthData"][];
+        };
+        /** FinancialMonthData */
+        FinancialMonthData: {
+            /** Month */
+            month: string;
+            /** Spending Data Complete */
+            spending_data_complete: boolean;
+            /** Show */
+            show: boolean;
+            /** Total Income Minor */
+            total_income_minor: number;
+            /** Income Transaction Count */
+            income_transaction_count: number;
+            /** Total Spending Minor */
+            total_spending_minor: number;
+            /** Spending Transaction Count */
+            spending_transaction_count: number;
+            /** Net Cash Flow Minor */
+            net_cash_flow_minor: number;
+        };
+        /** FinancialSummaryData */
+        FinancialSummaryData: {
+            all_data: components["schemas"]["FinancialAggregateData"];
+            shown_data: components["schemas"]["FinancialAggregateData"];
         };
         /** HealthData */
         HealthData: {
@@ -954,6 +1008,96 @@ export interface components {
              */
             as_of: string;
         };
+        /** SpendingAggregateData */
+        SpendingAggregateData: {
+            /** Total Spending Minor */
+            total_spending_minor: number;
+            /** Transaction Count */
+            transaction_count: number;
+            /** Month Count */
+            month_count: number;
+        };
+        /** SpendingAnalyticsData */
+        SpendingAnalyticsData: {
+            /**
+             * Schema Version
+             * @constant
+             */
+            schema_version: 2;
+            /** Currency */
+            currency: string | null;
+            summary: components["schemas"]["SpendingSummaryData"];
+            /** Months */
+            months: components["schemas"]["SpendingMonthData"][];
+            reconciliation: components["schemas"]["SpendingReconciliationData"];
+        };
+        /** SpendingCategoryData */
+        SpendingCategoryData: {
+            /** Category */
+            category: string;
+            /** Spending Minor */
+            spending_minor: number;
+            /** Transaction Count */
+            transaction_count: number;
+        };
+        /** SpendingMerchantData */
+        SpendingMerchantData: {
+            /** Merchant Name */
+            merchant_name: string | null;
+            /** Display Name */
+            display_name: string;
+            /** Is Unclassified */
+            is_unclassified: boolean;
+            /** Spending Minor */
+            spending_minor: number;
+            /** Transaction Count */
+            transaction_count: number;
+        };
+        /** SpendingMonthData */
+        SpendingMonthData: {
+            /** Month */
+            month: string;
+            /** Is Complete */
+            is_complete: boolean;
+            /** Show */
+            show: boolean;
+            /** Total Spending Minor */
+            total_spending_minor: number;
+            /** Transaction Count */
+            transaction_count: number;
+            /** Categories */
+            categories: components["schemas"]["SpendingCategoryData"][];
+            /** Merchants */
+            merchants: components["schemas"]["SpendingMerchantData"][];
+        };
+        /** SpendingReconciliationData */
+        SpendingReconciliationData: {
+            /** Zero Amount Transactions */
+            zero_amount_transactions: number;
+            /** Refund Transactions */
+            refund_transactions: number;
+            /** Same Merchant Refund Matches */
+            same_merchant_refund_matches: number;
+            /** Same Merchant Matched Amount Minor */
+            same_merchant_matched_amount_minor: number;
+            /** Net Consumption Transactions */
+            net_consumption_transactions: number;
+            /** Fully Refunded Transactions */
+            fully_refunded_transactions: number;
+            /** Partially Refunded Transactions */
+            partially_refunded_transactions: number;
+            /** Unmatched Refund Count */
+            unmatched_refund_count: number;
+            /** Unmatched Refund Amount Minor */
+            unmatched_refund_amount_minor: number;
+            /** Unclassified Net Transactions */
+            unclassified_net_transactions: number;
+        };
+        /** SpendingSummaryData */
+        SpendingSummaryData: {
+            all_data: components["schemas"]["SpendingAggregateData"];
+            shown_data: components["schemas"]["SpendingAggregateData"];
+        };
         /** TransactionData */
         TransactionData: {
             /** Id */
@@ -1136,7 +1280,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ApiResponse_dict_str__Any__"];
+                    "application/json": components["schemas"]["ApiResponse_SpendingAnalyticsData_"];
                 };
             };
         };
@@ -1156,7 +1300,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ApiResponse_dict_str__Any__"];
+                    "application/json": components["schemas"]["ApiResponse_FinancialAnalyticsData_"];
                 };
             };
         };
@@ -2272,6 +2416,7 @@ export interface operations {
                 limit?: number;
                 transaction_type?: ("income" | "expense") | null;
                 description?: string | null;
+                month?: string | null;
                 category?: string | null;
                 is_unclassified?: boolean | null;
                 sort?: "date_desc" | "date_asc" | "amount_desc" | "amount_asc";

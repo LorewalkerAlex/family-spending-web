@@ -2,7 +2,8 @@
 
 Independent Desktop Web client for Family Spending. The Backend remains the sole owner of household data and financial behavior; this project consumes `/api/v1` only.
 
-The implemented workspaces are Mapping Review and the Transaction Ledger:
+The implemented workspaces are Mapping Review, the Transaction Ledger, Spending Analytics, and
+Financial Analytics:
 
 ```text
 load unclassified descriptions
@@ -27,7 +28,16 @@ Client navigation uses stable hash routes:
 #mapping-review
 #transactions
 #transactions?description=<exact source description>
+#transactions?month=2026-07&category=<exact category>&transaction_type=expense
+#spending
+#financial
 ```
+
+Analytics responses are fully described by the generated OpenAPI contract. Spending shows
+Backend-owned net consumption, refund reconciliation, complete-month trends, categories, and
+merchants. Financial shows income, net spending, cash flow, and statement-month completeness.
+Category, unclassified, income, and spending metrics can drill into the Transaction Ledger with
+their month/type/category context encoded in the hash route.
 
 ## Development
 

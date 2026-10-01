@@ -42,20 +42,20 @@ function messageFrom(error: unknown): string {
 }
 
 export function TransactionsPage({
-  initialDescription = "",
+  initialFilters = {},
   api = transactionApi,
   statusApi = mappingReviewApi,
 }: {
-  initialDescription?: string;
+  initialFilters?: Partial<TransactionFilters>;
   api?: TransactionApi;
   statusApi?: Pick<MappingReviewApi, "getRuntimeStatus">;
 }) {
-  const initialFilters = {
+  const resolvedInitialFilters: TransactionFilters = {
     ...defaultTransactionFilters,
-    description: initialDescription,
+    ...initialFilters,
   };
-  const [draftFilters, setDraftFilters] = useState<TransactionFilters>(initialFilters);
-  const [filters, setFilters] = useState<TransactionFilters>(initialFilters);
+  const [draftFilters, setDraftFilters] = useState<TransactionFilters>(resolvedInitialFilters);
+  const [filters, setFilters] = useState<TransactionFilters>(resolvedInitialFilters);
   const [offset, setOffset] = useState(0);
   const [page, setPage] = useState<TransactionPageData | null>(null);
   const [runtime, setRuntime] = useState<RuntimeStatus | null>(null);
@@ -66,11 +66,18 @@ export function TransactionsPage({
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const next = { ...defaultTransactionFilters, description: initialDescription };
+    const next = { ...defaultTransactionFilters, ...initialFilters };
     setDraftFilters(next);
     setFilters(next);
     setOffset(0);
-  }, [initialDescription]);
+  }, [
+    initialFilters.category,
+    initialFilters.classification,
+    initialFilters.description,
+    initialFilters.month,
+    initialFilters.sort,
+    initialFilters.transactionType,
+  ]);
 
   const load = useCallback(async (signal?: AbortSignal) => {
     setLoading(true);
@@ -217,6 +224,14 @@ export function TransactionsPage({
                 value={draftFilters.description}
                 placeholder="留空显示全部"
                 onChange={(event) => setDraftFilters({ ...draftFilters, description: event.target.value })}
+              />
+            </label>
+            <label>
+              <span>月份</span>
+              <input
+                type="month"
+                value={draftFilters.month}
+                onChange={(event) => setDraftFilters({ ...draftFilters, month: event.target.value })}
               />
             </label>
             <label>

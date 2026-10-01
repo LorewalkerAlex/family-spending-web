@@ -8,6 +8,8 @@ export type MappingReviewRequest = components["schemas"]["MappingReviewRequest"]
 export type MappingReviewApplyRequest = components["schemas"]["MappingReviewApplyRequest"];
 export type MappingReviewApply = components["schemas"]["MappingReviewApplyData"];
 export type RuntimeStatus = components["schemas"]["RuntimeStatusData"];
+export type SpendingAnalytics = components["schemas"]["SpendingAnalyticsData"];
+export type FinancialAnalytics = components["schemas"]["FinancialAnalyticsData"];
 export type TransactionView = components["schemas"]["TransactionViewData"];
 export type TransactionListMeta = components["schemas"]["ApiListMeta"];
 export type TransactionQuery = NonNullable<
@@ -19,6 +21,8 @@ type WorkspaceResponse = components["schemas"]["ApiResponse_MappingReviewWorkspa
 type PreviewResponse = components["schemas"]["ApiResponse_MappingReviewPreviewData_"];
 type ApplyResponse = components["schemas"]["ApiResponse_MappingReviewApplyData_"];
 type RuntimeStatusResponse = components["schemas"]["ApiResponse_RuntimeStatusData_"];
+type SpendingAnalyticsResponse = components["schemas"]["ApiResponse_SpendingAnalyticsData_"];
+type FinancialAnalyticsResponse = components["schemas"]["ApiResponse_FinancialAnalyticsData_"];
 type TransactionListResponse = components["schemas"]["ApiListResponse_TransactionViewData_"];
 type TransactionResponse = components["schemas"]["ApiResponse_TransactionViewData_"];
 
@@ -32,6 +36,11 @@ const endpoints = {
 const transactionEndpoints = {
   list: "/api/v1/transactions",
   detail: "/api/v1/transactions/{transaction_id}",
+} as const satisfies Record<string, keyof paths>;
+
+const analyticsEndpoints = {
+  spending: "/api/v1/analytics/spending",
+  financial: "/api/v1/analytics/financial",
 } as const satisfies Record<string, keyof paths>;
 
 export class ApiError extends Error {
@@ -63,6 +72,11 @@ export interface TransactionApi {
     signal?: AbortSignal,
   ): Promise<TransactionListResponse>;
   getTransaction(transactionId: string, signal?: AbortSignal): Promise<TransactionView>;
+}
+
+export interface AnalyticsApi {
+  getSpending(signal?: AbortSignal): Promise<SpendingAnalytics>;
+  getFinancial(signal?: AbortSignal): Promise<FinancialAnalytics>;
 }
 
 type FetchImplementation = (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>;
@@ -187,3 +201,28 @@ export function createTransactionApi(
 }
 
 export const transactionApi = createTransactionApi();
+
+export function createAnalyticsApi(
+  baseUrl = "",
+  fetchImplementation: FetchImplementation = globalThis.fetch.bind(globalThis),
+): AnalyticsApi {
+  const request = createRequester(baseUrl, fetchImplementation);
+
+  return {
+    async getSpending(signal) {
+      const response = await request<SpendingAnalyticsResponse>(analyticsEndpoints.spending, {
+        signal,
+      });
+      return response.data;
+    },
+
+    async getFinancial(signal) {
+      const response = await request<FinancialAnalyticsResponse>(analyticsEndpoints.financial, {
+        signal,
+      });
+      return response.data;
+    },
+  };
+}
+
+export const analyticsApi = createAnalyticsApi();

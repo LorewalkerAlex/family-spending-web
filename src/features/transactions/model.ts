@@ -11,6 +11,7 @@ export interface TransactionFilters {
   classification: "all" | "classified" | "unclassified";
   category: string;
   description: string;
+  month: string;
   sort: NonNullable<TransactionQuery["sort"]>;
 }
 export const defaultTransactionFilters: TransactionFilters = {
@@ -18,6 +19,7 @@ export const defaultTransactionFilters: TransactionFilters = {
   classification: "all",
   category: "",
   description: "",
+  month: "",
   sort: "date_desc",
 };
 
@@ -38,6 +40,7 @@ export function transactionQuery(
       : { is_unclassified: filters.classification === "unclassified" }),
     ...(filters.category.trim() ? { category: filters.category.trim() } : {}),
     ...(filters.description.trim() ? { description: filters.description.trim() } : {}),
+    ...(filters.month ? { month: filters.month } : {}),
   };
 }
 

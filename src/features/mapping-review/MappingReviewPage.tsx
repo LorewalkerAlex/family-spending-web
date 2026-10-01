@@ -15,6 +15,7 @@ import {
   type MappingReviewWorkspace,
   type RuntimeStatus,
 } from "../../api/client";
+import { WorkspaceSidebar } from "../../components/WorkspaceSidebar";
 import {
   confidenceLabel,
   draftFromRecommendation,
@@ -96,44 +97,12 @@ export function MappingReviewPage({
 
   return (
     <div className="app-shell">
-      <aside className="sidebar">
-        <div className="brand">
-          <span className="brand__mark" aria-hidden="true">FS</span>
-          <div>
-            <strong>家庭消费</strong>
-            <span>Family Spending</span>
-          </div>
-        </div>
-
-        <nav className="workspace-nav" aria-label="主导航">
-          <a className="workspace-nav__item workspace-nav__item--active" href="#mapping-review">
-            <span>Mapping 审核</span>
-            <small>{workspace?.items.length ?? "—"}</small>
-          </a>
-          <a className="workspace-nav__item" href="#transactions">
-            <span>交易流水</span>
-            <small>{runtime?.counts.transactions ?? "—"}</small>
-          </a>
-          {[
-            ["消费分析", "下一阶段"],
-            ["财务分析", "下一阶段"],
-            ["自动化", "下一阶段"],
-          ].map(([label, status]) => (
-            <span className="workspace-nav__item workspace-nav__item--disabled" key={label}>
-              <span>{label}</span>
-              <small>{status}</small>
-            </span>
-          ))}
-        </nav>
-
-        <div className="sidebar__status">
-          <span className={`status-dot${runtime?.phase === "ready" ? " status-dot--ready" : ""}`} />
-          <div>
-            <strong>{runtime?.phase === "ready" ? "Backend ready" : "正在连接 Backend"}</strong>
-            <span>{runtime ? `generation ${runtime.generation}` : "127.0.0.1:8000"}</span>
-          </div>
-        </div>
-      </aside>
+      <WorkspaceSidebar
+        activePage="mapping-review"
+        runtime={runtime}
+        mappingCount={workspace?.items.length}
+        transactionCount={runtime?.counts.transactions}
+      />
 
       <main className="page-shell" id="mapping-review">
         <header className="page-header">

@@ -40,6 +40,7 @@ describe("transaction presentation model", () => {
       classification: "classified",
       category: " 餐饮 ",
       description: " 微信支付 测试商户 ",
+      month: "2026-09",
       sort: "amount_desc",
     };
 
@@ -51,6 +52,7 @@ describe("transaction presentation model", () => {
       is_unclassified: false,
       category: "餐饮",
       description: "微信支付 测试商户",
+      month: "2026-09",
     });
   });
 
@@ -94,6 +96,7 @@ describe("TransactionApi", () => {
       offset: 0,
       limit: 25,
       description: "微信支付 测试商户",
+      month: "2026-09",
       is_unclassified: false,
       sort: "date_desc",
     });
@@ -106,6 +109,7 @@ describe("TransactionApi", () => {
       offset: "0",
       limit: "25",
       description: "微信支付 测试商户",
+      month: "2026-09",
       is_unclassified: "false",
       sort: "date_desc",
     });
@@ -116,9 +120,24 @@ describe("TransactionApi", () => {
 describe("mapping-to-transaction route", () => {
   it("round-trips an exact source description without losing reserved characters", () => {
     const description = "支付宝 / 商户?订单=42 & 已完成";
-    const route = transactionsRoute(description);
+    const route = transactionsRoute({
+      description,
+      category: "餐饮",
+      month: "2026-09",
+      transactionType: "expense",
+      classification: "classified",
+    });
 
     expect(route).toContain("#transactions?description=");
-    expect(parseRoute(route)).toEqual({ page: "transactions", description });
+    expect(parseRoute(route)).toEqual({
+      page: "transactions",
+      transactionFilters: {
+        description,
+        category: "餐饮",
+        month: "2026-09",
+        transactionType: "expense",
+        classification: "classified",
+      },
+    });
   });
 });
