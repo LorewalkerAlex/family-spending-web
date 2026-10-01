@@ -2271,6 +2271,7 @@ export interface operations {
                 offset?: number;
                 limit?: number;
                 transaction_type?: ("income" | "expense") | null;
+                description?: string | null;
                 category?: string | null;
                 is_unclassified?: boolean | null;
                 sort?: "date_desc" | "date_asc" | "amount_desc" | "amount_asc";

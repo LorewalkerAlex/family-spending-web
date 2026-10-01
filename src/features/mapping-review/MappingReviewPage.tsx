@@ -32,7 +32,13 @@ function messageFrom(error: unknown): string {
   return error instanceof Error ? error.message : String(error);
 }
 
-export function MappingReviewPage({ api = mappingReviewApi }: { api?: MappingReviewApi }) {
+export function MappingReviewPage({
+  api = mappingReviewApi,
+  onViewTransactions,
+}: {
+  api?: MappingReviewApi;
+  onViewTransactions?: (description: string) => void;
+}) {
   const [workspace, setWorkspace] = useState<MappingReviewWorkspace | null>(null);
   const [runtime, setRuntime] = useState<RuntimeStatus | null>(null);
   const [selectedDescription, setSelectedDescription] = useState<string | null>(null);
@@ -40,6 +46,7 @@ export function MappingReviewPage({ api = mappingReviewApi }: { api?: MappingRev
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
+  const [appliedDescription, setAppliedDescription] = useState<string | null>(null);
 
   const load = useCallback(
     async (preferredDescription?: string | null, signal?: AbortSignal) => {
@@ -83,6 +90,7 @@ export function MappingReviewPage({ api = mappingReviewApi }: { api?: MappingRev
 
   async function applied(description: string): Promise<void> {
     setNotice(`已应用「${description}」的 Mapping；队列和运行状态已刷新。`);
+    setAppliedDescription(description);
     await load(null);
   }
 
@@ -102,8 +110,11 @@ export function MappingReviewPage({ api = mappingReviewApi }: { api?: MappingRev
             <span>Mapping 审核</span>
             <small>{workspace?.items.length ?? "—"}</small>
           </a>
+          <a className="workspace-nav__item" href="#transactions">
+            <span>交易流水</span>
+            <small>{runtime?.counts.transactions ?? "—"}</small>
+          </a>
           {[
-            ["交易", "下一阶段"],
             ["消费分析", "下一阶段"],
             ["财务分析", "下一阶段"],
             ["自动化", "下一阶段"],
@@ -144,7 +155,19 @@ export function MappingReviewPage({ api = mappingReviewApi }: { api?: MappingRev
         </header>
 
         <section className="page-content">
-          {notice ? <div className="notice notice--success">{notice}</div> : null}
+          {notice ? (
+            <div className="notice notice--success notice--with-action">
+              <span>{notice}</span>
+              {appliedDescription && onViewTransactions ? (
+                <button
+                  type="button"
+                  onClick={() => onViewTransactions(appliedDescription)}
+                >
+                  查看受影响交易
+                </button>
+              ) : null}
+            </div>
+          ) : null}
           {error ? (
             <div className="notice notice--error">
               <span>{error}</span>
@@ -199,6 +222,7 @@ export function MappingReviewPage({ api = mappingReviewApi }: { api?: MappingRev
                     selected={item.description === selectedDescription}
                     onSelect={() => {
                       setNotice(null);
+                      setAppliedDescription(null);
                       setSelectedDescription(item.description);
                     }}
                   />

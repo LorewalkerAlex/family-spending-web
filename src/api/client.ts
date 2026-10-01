@@ -1,4 +1,4 @@
-import type { components, paths } from "./schema";
+import type { components, operations, paths } from "./schema";
 
 export type MappingReviewWorkspace = components["schemas"]["MappingReviewWorkspaceData"];
 export type MappingReviewItem = components["schemas"]["MappingReviewItemData"];
@@ -8,18 +8,30 @@ export type MappingReviewRequest = components["schemas"]["MappingReviewRequest"]
 export type MappingReviewApplyRequest = components["schemas"]["MappingReviewApplyRequest"];
 export type MappingReviewApply = components["schemas"]["MappingReviewApplyData"];
 export type RuntimeStatus = components["schemas"]["RuntimeStatusData"];
+export type TransactionView = components["schemas"]["TransactionViewData"];
+export type TransactionListMeta = components["schemas"]["ApiListMeta"];
+export type TransactionQuery = NonNullable<
+  operations["list_transactions_api_v1_transactions_get"]["parameters"]["query"]
+>;
 
 type ApiErrorBody = components["schemas"]["ErrorResponse"];
 type WorkspaceResponse = components["schemas"]["ApiResponse_MappingReviewWorkspaceData_"];
 type PreviewResponse = components["schemas"]["ApiResponse_MappingReviewPreviewData_"];
 type ApplyResponse = components["schemas"]["ApiResponse_MappingReviewApplyData_"];
 type RuntimeStatusResponse = components["schemas"]["ApiResponse_RuntimeStatusData_"];
+type TransactionListResponse = components["schemas"]["ApiListResponse_TransactionViewData_"];
+type TransactionResponse = components["schemas"]["ApiResponse_TransactionViewData_"];
 
 const endpoints = {
   workspace: "/api/v1/mapping-reviews",
   preview: "/api/v1/mapping-reviews/preview",
   apply: "/api/v1/mapping-reviews/apply",
   runtime: "/api/v1/runtime/status",
+} as const satisfies Record<string, keyof paths>;
+
+const transactionEndpoints = {
+  list: "/api/v1/transactions",
+  detail: "/api/v1/transactions/{transaction_id}",
 } as const satisfies Record<string, keyof paths>;
 
 export class ApiError extends Error {
@@ -43,6 +55,14 @@ export interface MappingReviewApi {
   getRuntimeStatus(signal?: AbortSignal): Promise<RuntimeStatus>;
   previewMapping(input: MappingReviewRequest): Promise<MappingReviewPreview>;
   applyMapping(input: MappingReviewApplyRequest): Promise<MappingReviewApply>;
+}
+
+export interface TransactionApi {
+  listTransactions(
+    query: TransactionQuery,
+    signal?: AbortSignal,
+  ): Promise<TransactionListResponse>;
+  getTransaction(transactionId: string, signal?: AbortSignal): Promise<TransactionView>;
 }
 
 type FetchImplementation = (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>;
@@ -71,16 +91,10 @@ function isApiErrorBody(value: unknown): value is ApiErrorBody {
   );
 }
 
-export function createMappingReviewApi(
-  baseUrl = "",
-  fetchImplementation: FetchImplementation = globalThis.fetch.bind(globalThis),
-): MappingReviewApi {
+function createRequester(baseUrl: string, fetchImplementation: FetchImplementation) {
   const normalizedBaseUrl = baseUrl.replace(/\/$/, "");
 
-  async function request<T>(
-    path: (typeof endpoints)[keyof typeof endpoints],
-    init: RequestInit = {},
-  ): Promise<T> {
+  return async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
     const response = await fetchImplementation(`${normalizedBaseUrl}${path}`, {
       credentials: "same-origin",
       ...init,
@@ -96,7 +110,14 @@ export function createMappingReviewApi(
       throw new ApiError(response.status, isApiErrorBody(body) ? body : null);
     }
     return body as T;
-  }
+  };
+}
+
+export function createMappingReviewApi(
+  baseUrl = "",
+  fetchImplementation: FetchImplementation = globalThis.fetch.bind(globalThis),
+): MappingReviewApi {
+  const request = createRequester(baseUrl, fetchImplementation);
 
   return {
     async getWorkspace(signal) {
@@ -129,3 +150,40 @@ export function createMappingReviewApi(
 
 export const mappingReviewApi = createMappingReviewApi();
 
+function transactionQueryString(query: TransactionQuery): string {
+  const parameters = new URLSearchParams();
+  for (const [name, value] of Object.entries(query)) {
+    if (value !== undefined && value !== null && value !== "") {
+      parameters.set(name, String(value));
+    }
+  }
+  const serialized = parameters.toString();
+  return serialized ? `?${serialized}` : "";
+}
+
+export function createTransactionApi(
+  baseUrl = "",
+  fetchImplementation: FetchImplementation = globalThis.fetch.bind(globalThis),
+): TransactionApi {
+  const request = createRequester(baseUrl, fetchImplementation);
+
+  return {
+    async listTransactions(query, signal) {
+      return request<TransactionListResponse>(
+        `${transactionEndpoints.list}${transactionQueryString(query)}`,
+        { signal },
+      );
+    },
+
+    async getTransaction(transactionId, signal) {
+      const path = transactionEndpoints.detail.replace(
+        "{transaction_id}",
+        encodeURIComponent(transactionId),
+      );
+      const response = await request<TransactionResponse>(path, { signal });
+      return response.data;
+    },
+  };
+}
+
+export const transactionApi = createTransactionApi();

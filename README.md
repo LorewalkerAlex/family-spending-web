@@ -2,7 +2,7 @@
 
 Independent Desktop Web client for Family Spending. The Backend remains the sole owner of household data and financial behavior; this project consumes `/api/v1` only.
 
-The first implemented workspace is Mapping Review:
+The implemented workspaces are Mapping Review and the Transaction Ledger:
 
 ```text
 load unclassified descriptions
@@ -14,6 +14,20 @@ load unclassified descriptions
 ```
 
 Recommendations never apply themselves. Changing Merchant or Category invalidates the current preview token.
+
+After a Mapping is applied, the success action opens the Transaction Ledger with an exact
+description filter. The Backend performs that query, so the verification path does not rely on
+loading a bounded client-side snapshot. The ledger also provides Backend-owned type,
+classification, category and sort filters, offset pagination, and a separately loaded transaction
+detail with its current Enrichment.
+
+Client navigation uses stable hash routes:
+
+```text
+#mapping-review
+#transactions
+#transactions?description=<exact source description>
+```
 
 ## Development
 
@@ -53,4 +67,3 @@ Tests focus on the API workflow and deterministic presentation behavior. Backend
 ## Deployment
 
 The production image serves static assets and the SPA fallback on port 80. The independent Caddy gateway routes `/api/*` to the Backend and all other paths to this Web container. The Web image contains no Backend credentials or household data.
-

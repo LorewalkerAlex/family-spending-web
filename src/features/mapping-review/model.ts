@@ -4,6 +4,8 @@ import type {
   MappingReviewPreview,
 } from "../../api/client";
 
+export { formatMoney } from "../../presentation/format";
+
 export interface MappingDraft {
   merchant: string;
   category: string;
@@ -20,18 +22,6 @@ export function draftFromRecommendation(recommendation: MappingRecommendation): 
     merchant: recommendation.merchant,
     category: recommendation.category ?? "",
   };
-}
-
-export function formatMoney(amount: string, currency: string): string {
-  const numeric = Number(amount);
-  if (!Number.isFinite(numeric)) return `${amount} ${currency}`;
-
-  return new Intl.NumberFormat("zh-CN", {
-    style: "currency",
-    currency,
-    currencyDisplay: "narrowSymbol",
-    minimumFractionDigits: 2,
-  }).format(numeric);
 }
 
 export function confidenceLabel(confidence: MappingRecommendation["confidence"]): string {
@@ -103,4 +93,3 @@ export function filterReviewItems(
     ].some((value) => value.toLocaleLowerCase("zh-CN").includes(normalized));
   });
 }
-
